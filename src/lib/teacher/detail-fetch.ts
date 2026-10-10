@@ -11,6 +11,7 @@ import {
   DiagnosisRowSchema,
   ProgressRowSchema,
   QuestionRowSchema,
+  ResourceRowSchema,
   SupportCycleRowSchema,
 } from "./types";
 
@@ -33,7 +34,9 @@ export function fetchStudentRecords(sb: SupabaseClient, studentId: string) {
     fetchRows("Answers", AnswerRowSchema, () =>
       sb
         .from("answers")
-        .select("id, attempt_id, question_id, typed_text, upload_path, interpreted_text, interpreted_by, is_correct, created_at")
+        .select(
+          "id, attempt_id, question_id, typed_text, upload_path, interpreted_text, interpreted_by, is_correct, created_at, kind, clarifies_answer_id, confirmed_text, reading_status",
+        )
         .eq("student_id", studentId)
         .order("created_at"),
     ),
@@ -54,6 +57,13 @@ export function fetchStudentRecords(sb: SupabaseClient, studentId: string) {
         .order("cycle_number"),
     ),
   ] as const);
+}
+
+/** Approved resources only (the contract allows only approved ones in assigned support). Real ids for the support form. */
+export function fetchApprovedResources(sb: SupabaseClient) {
+  return fetchRows("Approved resources", ResourceRowSchema, () =>
+    sb.from("resources").select("id, concept_id, kind, title").eq("approved", true).order("position"),
+  );
 }
 
 /** Question-bank prompts, only for the ids the stored work mentions. Used when an attempt did not store a prompt. */

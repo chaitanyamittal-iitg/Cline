@@ -50,6 +50,13 @@ export const AnswerRowSchema = z.object({
   interpreted_by: z.string().nullable(),
   is_correct: z.boolean().nullable(),
   created_at: z.string(),
+  // Added by migration 0006 (applied). A clarification reply is its own row that points at the original answer.
+  kind: z.string(),
+  clarifies_answer_id: z.string().nullable(),
+  /** The student's own confirmed or corrected text for an uploaded image. Null on rows from before 0006. */
+  confirmed_text: z.string().nullable(),
+  /** What the AI managed to do with the image: read, unclear or not_read. Null when no AI reading was recorded. */
+  reading_status: z.string().nullable(),
 });
 export type AnswerRow = z.infer<typeof AnswerRowSchema>;
 
@@ -87,6 +94,15 @@ export const SupportCycleRowSchema = z.object({
   created_at: z.string(),
 });
 export type SupportCycleRow = z.infer<typeof SupportCycleRowSchema>;
+
+/** resources (0001_core.sql). Read only to offer REAL approved resource ids when a teacher assigns support. */
+export const ResourceRowSchema = z.object({
+  id: z.string(),
+  concept_id: z.string(),
+  kind: z.string(),
+  title: z.string(),
+});
+export type ResourceRow = z.infer<typeof ResourceRowSchema>;
 
 // ---- Result wrappers ------------------------------------------------------
 /** A section either loaded or failed. A failure is never shown as "no data". */

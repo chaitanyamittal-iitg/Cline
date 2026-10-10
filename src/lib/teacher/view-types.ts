@@ -5,6 +5,11 @@ export interface AnswerView {
   answer: AnswerRow;
   /** Diagnoses whose answer_id equals this answer's id (a real foreign key), nothing else. */
   diagnoses: DiagnosisRow[];
+  /**
+   * Clarification replies whose clarifies_answer_id equals this answer's id (a real foreign key), oldest first.
+   * Always empty on a clarification itself.
+   */
+  clarifications: AnswerView[];
 }
 
 export interface QuestionItem {

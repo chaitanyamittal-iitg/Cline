@@ -1,10 +1,14 @@
-// Student detail (read-only). Owned by the Teacher dashboard (branch feat/teacher).
-// Reads with the teacher's own session (RLS applies). No actions, notes, overrides or approvals.
+// Student detail. Owned by the Teacher dashboard (branch feat/teacher).
+// Reads with the teacher's own session (RLS applies). The action forms below call POST /api/teacher/action; this page
+// itself writes nothing. Saving is read from the backend flag on the server and passed down as a plain boolean.
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireTeacher } from "@/lib/auth";
 import { loadStudentDetail } from "@/lib/teacher/detail";
+import { teacherActionSavingReady } from "@/lib/teacher/readiness";
 import { AttemptCard } from "@/components/teacher/AttemptCard";
+import { ClarificationReply } from "@/components/teacher/ClarificationReply";
+import { ConceptActions } from "@/components/teacher/ConceptActions";
 import { ProgressSummary } from "@/components/teacher/ProgressSummary";
 import { ReloadButton } from "@/components/teacher/ReloadButton";
 import { SectionError } from "@/components/teacher/SectionError";
@@ -34,8 +38,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     );
   }
 
-  const { student, progress, conceptTitles, work, unlinkedDiagnoses, support, images } = result.detail;
+  const { student, progress, conceptTitles, work, unlinkedDiagnoses, support, images, diagnosisOptions, resourceOptions } =
+    result.detail;
   const titleOf = (conceptId: string) => conceptTitles[conceptId] ?? conceptId;
+  const savingReady = teacherActionSavingReady();
 
   return (
     <div className={styles.stack}>
@@ -48,14 +54,41 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <ProgressSummary progress={progress} />
       </section>
 
+      <section aria-labelledby="actions-heading">
+        <h2 id="actions-heading">Teacher actions</h2>
+        <p className={styles.sectionNote}>
+          One set of actions per recorded concept. Nothing is chosen as the &ldquo;current&rdquo; concept: pick the concept the
+          action is about. Diagnoses and student work shown on this page are never edited by these actions.
+        </p>
+        {!progress.ok ? (
+          <SectionError message={progress.message} />
+        ) : progress.data.length === 0 ? (
+          <p className="card muted">
+            No concept progress is recorded for this student, so there is no concept to act on.
+          </p>
+        ) : (
+          progress.data.map((concept) => (
+            <ConceptActions
+              key={concept.conceptId}
+              studentId={student.id}
+              concept={concept}
+              diagnosisOptions={diagnosisOptions}
+              resourceOptions={resourceOptions}
+              savingReady={savingReady}
+            />
+          ))
+        )}
+      </section>
+
       <section aria-labelledby="work-heading">
         <div className={styles.cardHeader}>
           <h2 id="work-heading">Attempts and answers</h2>
           <ReloadButton label="Reload (fresh image links)" />
         </div>
         <p className={styles.sectionNote}>
-          Original work is shown first. Stored AI readings and diagnoses are labelled with their recorded source. Nothing here is
-          scored.
+          For each answer the original submission comes first, then the text the student confirmed for a handwritten image, then
+          the AI&rsquo;s draft reading, then any clarification replies. Stored AI readings and diagnoses are labelled with their
+          recorded source. Nothing here is scored.
         </p>
         {!work.ok ? (
           <SectionError message={work.message} />
@@ -79,6 +112,18 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   promptsLoaded={work.data.questionPromptsLoaded}
                 />
               ))
+            )}
+            {work.data.unlinkedClarifications.length > 0 && (
+              <div className="card">
+                <h3>Clarification replies without a found original</h3>
+                <p className={styles.sectionNote}>
+                  These replies name an original answer that could not be found among this student&rsquo;s answers, so they are not
+                  attached to any question. Pairing them by time or concept would be a guess, so it is not done.
+                </p>
+                {work.data.unlinkedClarifications.map((c) => (
+                  <ClarificationReply key={c.answer.id} view={c} images={images} conceptTitles={conceptTitles} />
+                ))}
+              </div>
             )}
             {work.data.orphanAnswers.length > 0 && (
               <p className="notice">

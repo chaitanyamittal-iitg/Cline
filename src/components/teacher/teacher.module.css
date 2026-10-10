@@ -29,6 +29,8 @@
 .quote { border-left: 3px solid var(--border); padding-left: 0.75rem; margin: 0; }
 .original { border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.8rem; background: #fff; }
 .derived { border: 1px dashed var(--border); border-radius: 10px; padding: 0.6rem 0.8rem; background: var(--bg); }
+.confirmed { border: 1px solid #9db8ef; border-radius: 10px; padding: 0.6rem 0.8rem; background: #f1f5fd; }
+.clarification { border-left: 4px solid var(--warn); background: #fffaf0; border-radius: 8px; padding: 0.6rem 0.9rem; margin-top: 0.6rem; }
 .answerBlock { border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 0.9rem; margin-top: 0.75rem; }
 .diagnosis { border-left: 4px solid var(--brand); background: #f1f5fd; border-radius: 8px; padding: 0.6rem 0.9rem; margin-top: 0.75rem; }
 .diagnosis p { margin: 0.15rem 0; }
@@ -39,3 +41,24 @@
 .imageActions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
 .jsonBlock { margin: 0.25rem 0 0; padding: 0.6rem 0.8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; font-size: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .skeleton { color: var(--muted); }
+
+/* ---- Teacher action forms ------------------------------------------------ */
+.actionPanel { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.75rem; }
+.actionForm { border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 0.9rem; margin: 0 0 0.75rem; background: #fff; }
+.actionForm legend { font-weight: 700; padding: 0 0.35rem; }
+.actionForm textarea { min-height: 88px; resize: vertical; }
+.fieldHelp { color: var(--muted); font-size: 0.9rem; margin: 0.2rem 0 0; }
+.fieldError { color: var(--danger); font-size: 0.9rem; margin: 0.2rem 0 0; }
+.checkRow { display: flex; align-items: flex-start; gap: 0.6rem; min-height: 44px; margin: 0.5rem 0; font-weight: 400; }
+.checkRow input[type="checkbox"], .checkRow input[type="radio"] { width: 1.35rem; height: 1.35rem; min-height: 0; margin: 0.15rem 0 0; flex: none; }
+.radioGroup { border: 0; padding: 0; margin: 0.5rem 0; }
+.radioGroup legend { font-weight: 600; padding: 0; }
+.formActions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-top: 0.75rem; }
+.btnPending { opacity: 0.7; cursor: not-allowed; }
+.feedback { border-radius: 8px; padding: 0.6rem 0.9rem; margin-top: 0.75rem; }
+.feedbackSaved { border-left: 4px solid var(--ok); background: #eefaf3; }
+.feedbackWarn { border-left: 4px solid var(--warn); background: #fff8eb; }
+.feedbackError { border-left: 4px solid var(--danger); background: #fdeceb; }
+.feedback p { margin: 0.2rem 0; }
+.diagnosisSummary { border: 1px dashed var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; background: var(--bg); margin-top: 0.5rem; }
+

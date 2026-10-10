@@ -62,6 +62,17 @@ export function reasoningLabel(sound: boolean): string {
   return sound ? "Reasoning judged sound" : "Reasoning judged not sound";
 }
 
+/** answers.reading_status (migration 0006): what the AI managed to do with the handwritten image. */
+export function readingStatusLabel(status: string | null): string {
+  switch (status) {
+    case "read": return "The AI read the image and produced a draft";
+    case "unclear": return "The AI tried but could not read the image reliably";
+    case "not_read": return "The AI did not read the image (nothing was transcribed)";
+    case null: return "No AI reading status was recorded";
+    default: return `Unrecognised reading status (${status})`;
+  }
+}
+
 export type SourceTone = "mock" | "live" | "unknown";
 
 /** Label for ai_source / interpreted_by. Anything that is not exactly "live" is never called live. */

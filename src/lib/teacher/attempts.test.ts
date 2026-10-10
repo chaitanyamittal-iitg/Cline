@@ -22,6 +22,10 @@ const answer = (over: Partial<AnswerRow>): AnswerRow => ({
   interpreted_by: null,
   is_correct: false,
   created_at: "2026-10-10T08:05:00Z",
+  kind: "original",
+  clarifies_answer_id: null,
+  confirmed_text: null,
+  reading_status: null,
   ...over,
 });
 const diagnosis = (over: Partial<DiagnosisRow>): DiagnosisRow => ({

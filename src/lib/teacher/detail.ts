@@ -4,7 +4,8 @@
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { buildAttemptViews, findUnlinkedDiagnoses } from "./attempts";
-import { fetchStudentRecords, fetchQuestionPrompts } from "./detail-fetch";
+import { fetchApprovedResources, fetchStudentRecords, fetchQuestionPrompts } from "./detail-fetch";
+import { toDiagnosisOptions, toResourceOptions, type DiagnosisOption, type ResourceOption } from "./options";
 import { fetchRows } from "./fetch";
 import { isStudentIdFormat } from "./ids";
 import { buildProgressViews, collectQuestionIds } from "./linking";
@@ -24,6 +25,8 @@ export interface WorkSection {
   attempts: AttemptView[];
   /** Answers whose attempt was not loaded. Shown separately, never attached to another attempt. */
   orphanAnswers: AnswerView[];
+  /** Clarification replies whose original answer could not be found. Shown separately, never attached to a guess. */
+  unlinkedClarifications: AnswerView[];
   diagnosesLoaded: boolean;
   questionPromptsLoaded: boolean;
 }
@@ -39,6 +42,10 @@ export interface StudentDetail {
   support: SectionResult<SupportCycleView[]>;
   /** upload_path -> signed URL result, for this student's stored handwritten work only. */
   images: Record<string, ImageResult>;
+  /** The student's real stored diagnoses, selectable for an override. A failed load is kept distinct from "none". */
+  diagnosisOptions: SectionResult<DiagnosisOption[]>;
+  /** Real approved resources, selectable when assigning support. */
+  resourceOptions: SectionResult<ResourceOption[]>;
 }
 
 export type StudentDetailResult =
@@ -93,6 +100,7 @@ export async function loadStudentDetail(studentId: string): Promise<StudentDetai
 
   const paths = (answerRows ?? []).flatMap((a) => (a.upload_path ? [a.upload_path] : []));
   const images = paths.length > 0 ? await signWorkImages(sb, student.id, paths) : {};
+  const resources = await fetchApprovedResources(sb);
 
   return {
     status: "ok",
@@ -110,6 +118,12 @@ export async function loadStudentDetail(studentId: string): Promise<StudentDetai
         ? { ok: true, data: buildSupportCycleViews(cycles.data, diagnosisRows, attemptRows) }
         : { ok: false, message: cycles.message },
       images,
+      diagnosisOptions: diagnoses.ok
+        ? { ok: true, data: toDiagnosisOptions(diagnoses.data) }
+        : { ok: false, message: diagnoses.message },
+      resourceOptions: resources.ok
+        ? { ok: true, data: toResourceOptions(resources.data) }
+        : { ok: false, message: resources.message },
     },
   };
 }
