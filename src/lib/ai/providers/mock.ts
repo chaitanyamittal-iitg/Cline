@@ -31,12 +31,10 @@ export class MockAiProvider implements AiProvider {
     };
   }
 
+  /** The mock cannot read images, and says so. The student types what the handwriting says instead. */
   async interpretHandwriting(_input: InterpretHandwritingInput): Promise<InterpretHandwritingOutput> {
     void _input;
-    return {
-      interpretedText: "[MOCK AI] Pretend handwriting reading: the bulb will not light because the circuit is open.",
-      source: "mock",
-    };
+    return { reading: { status: "not_read", draftText: null, source: "mock" } };
   }
 
   async diagnose(input: DiagnoseInput): Promise<Diagnosis> {
