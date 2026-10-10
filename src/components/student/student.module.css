@@ -1,0 +1,142 @@
+/* Local styles for the student screens (mobile first; tablets are the main classroom device). */
+
+.page { max-width: 46rem; margin: 0 auto; }
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.objective { margin: 0 0 1rem; color: var(--muted); }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.statusRow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-bottom: 0.5rem; }
+.pill {
+  display: inline-block;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #e8edf6;
+  color: var(--text);
+}
+.pillWaiting { background: #e3ecff; color: var(--brand-dark); }
+.pillAttention { background: #fff4d6; color: #7a4b00; }
+
+.stateNotice { border-left: 4px solid var(--brand); background: #f1f5ff; padding: 0.85rem 1rem; border-radius: 8px; margin: 0.75rem 0 0; }
+.stateNotice h2 { margin: 0 0 0.25rem; }
+.stateNotice p { margin: 0; }
+.toneWaiting { border-left-color: var(--brand-dark); background: #eaf0fb; }
+.toneAttention { border-left-color: var(--warn); background: #fff8eb; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1rem; }
+.primary { min-width: 12rem; text-align: center; padding: 0.75rem 1.4rem; font-size: 1.05rem; }
+.primary:disabled { opacity: 0.65; cursor: progress; }
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.step { margin: 0 0 0.5rem; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--brand); }
+
+.video { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #0e1520; }
+.video iframe, .video video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.videoNote { margin: 0.5rem 0 0; font-size: 0.95rem; color: var(--muted); }
+
+.reading p { margin: 0 0 1rem; font-size: 1.1rem; line-height: 1.75; }
+.reading p:last-child { margin-bottom: 0; }
+
+.journey { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.journeyItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+a.journeyItem:hover { background: #f1f5ff; }
+.journeyCurrent { border-color: var(--brand); }
+.journeyTitle { font-weight: 600; }
+.journeyStatus { font-size: 0.9rem; color: var(--muted); }
+
+.inlineStatus { margin: 0.75rem 0 0; }
+
+@media (min-width: 768px) {
+  .actions { margin-top: 1.25rem; }
+}
+
+/* ---- Milestone 2: doubts, written test, feedback, support ---- */
+.hint { margin: 0.35rem 0 0; font-size: 0.9rem; color: var(--muted); }
+
+.chat { list-style: none; margin: 1rem 0; padding: 0; display: grid; gap: 0.75rem; }
+.bubbleStudent, .bubbleTutor { padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--border); }
+.bubbleStudent { background: #f1f5ff; margin-left: 1.5rem; }
+.bubbleTutor { background: var(--surface); margin-right: 1.5rem; }
+.bubbleWho { margin: 0 0 0.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+.bubbleText { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.visual { margin: 0.75rem 0 0; }
+.visualTitle { font-weight: 600; margin-bottom: 0.4rem; }
+.visualImage { display: block; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.visualNote { margin: 0; padding: 0.6rem 0.8rem; border-radius: 8px; background: #f6f8fb; color: var(--muted); }
+
+.question { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin: 0 0 1rem; min-inline-size: 0; }
+.questionLegend { margin: 0 0 0.25rem; padding: 0 0.25rem; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--brand); }
+.questionPrompt { margin: 0 0 0.75rem; font-size: 1.1rem; line-height: 1.6; }
+
+.modeRow { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+.modeBtn { min-height: 44px; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.modeOn { background: #e3ecff; border-color: var(--brand); color: var(--brand-dark); }
+
+.photoBox { display: grid; gap: 0.25rem; }
+.preview { max-width: 100%; max-height: 18rem; width: auto; height: auto; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 10px; }
+.review { margin-top: 0.75rem; }
+.confirmed { margin: 0; font-weight: 700; color: var(--ok); }
+
+.feedbackList { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 1rem; }
+.feedbackItem { border: 1px solid var(--border); border-left-width: 6px; border-radius: 12px; padding: 0.9rem 1rem; background: var(--surface); }
+.verdictGood { border-left-color: var(--ok); }
+.verdictReasoning { border-left-color: var(--warn); }
+.verdictNotYet { border-left-color: var(--brand); }
+.verdictClarify { border-left-color: #7a4b00; background: #fff8eb; }
+.verdictTeacher { border-left-color: var(--brand-dark); background: #eaf0fb; }
+.verdict { margin: 0.5rem 0; font-weight: 700; }
+.yourAnswer { margin: 0 0 0.5rem; padding: 0.5rem 0.75rem; border-radius: 8px; background: #f6f8fb; overflow-wrap: anywhere; white-space: pre-wrap; }
+.reasoning p { margin: 0 0 0.5rem; }
+
+.followUp { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-top: 1rem; background: #fff8eb; }
+.followUpQuestion { margin: 0 0 0.5rem; font-size: 1.1rem; font-weight: 600; }
+
+.supportLead { font-size: 1.1rem; line-height: 1.7; }
+.supportBlock { margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px; background: #f1f5ff; }
+.supportBlock h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.supportBlock p { margin: 0; }
+
+.lessonAgain { margin: 1rem 0; }
+.lessonAgain > summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font-weight: 600; color: var(--brand); }
+
+@media (max-width: 520px) {
+  .bubbleStudent { margin-left: 0.5rem; }
+  .bubbleTutor { margin-right: 0.5rem; }
+  .primary { width: 100%; }
+}
+

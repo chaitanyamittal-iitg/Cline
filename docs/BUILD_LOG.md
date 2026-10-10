@@ -4,6 +4,17 @@ Only things that actually happened are recorded here. Update the "Checks" lines 
 
 REMINDER: record a short **screen recording** of Cline editing code and running checks for the mandatory demo video.
 
+## Backend Stage 1 (branch `feat/ai`): typed-answer journey and teacher approval
+
+- Cline wrote migration `0007_learning_loop_functions.sql` (six atomic functions), `verify_0007.sql`, the API-safe auth helper,
+  four student routes, the learning services, `approve_next_concept` / `note` persistence, tests, and `scripts/integration/*`.
+- Checks that ran: lint, typecheck, test (174), build: exit 0. `npm run verify:stage1` over real HTTP with signed-in demo sessions:
+  9 authentication checks passed; the journey is **blocked until 0007 is applied** (preflight failed with `PGRST202`).
+- Mistake and fix: two read-only helper scripts were run by accident because their file names already existed; they only read
+  repo files and wrote temp files. Two tests failed on the first run (a response body read twice, and an over-strict leak
+  guard); both were fixed in the tests, not in the code under test.
+- Details and the exact apply steps: `docs/BACKEND_STAGE1.md`.
+
 ## Milestone 1: Foundation (branch `feat/foundation`)
 
 **Date:** 10 Oct 2026
