@@ -3,7 +3,8 @@
 --
 -- Run it AFTER all five migrations (0001 to 0005). If only 0001-0004 are applied, checks 1, 8 and 14 will say
 -- FAIL on purpose (they count the tables and policies that 0005 adds); that means "apply 0005", not "broken".
--- Nothing in this file has been run yet by anyone: treat every row as unverified until you see it say PASS.
+-- History: run once by the lead after migration 0005 (14 of 14 PASS, user-reported, 10 Oct 2026). Re-run it after
+-- any new migration; treat any row that does not say PASS as unverified.
 --
 -- EXPECTED RESULT: 14 rows, and the "result" column says PASS on every row.
 -- If any row says FAIL, send the lead that row's check_name (no keys needed) and do not continue.

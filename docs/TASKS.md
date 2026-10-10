@@ -129,15 +129,23 @@ Tests and demo prepares rehearsal data and the script from day one; runs the end
 - Cross-feature tests in `tests/**`; `npm run check` green; `npm run verify:rls` all PASS after the final merge.
 - Draft diagram SVGs for the placeholder paths in `supabase/seed/content_1_concepts_resources.sql`; the submission notes, PPT outline and recording checklist.
 
-## Applying migration 0005 (the lead does this once, before merging the foundation)
+## Applying migration 0005 (DONE on the shared Supabase project on 10 Oct 2026; keep for anyone creating a fresh project)
 
 `supabase/migrations/0005_homework_diagnosis_and_generated_keys.sql` fixes two gaps found while defining the
 contracts (homework diagnoses had nowhere to be saved; generated questions had nowhere to keep hidden keys).
-It does not edit migrations 0001-0004, which are already applied.
+It does not edit migrations 0001-0004. Status: applied; the lead reported 14 of 14 PASS on the summary query
+and 41 of 41 on `npm run verify:rls`. Teammates share this one project, so they do **not** apply it again.
 
 1. Supabase dashboard, **SQL Editor**, new query, paste the whole file, **Run**. It should say success.
 2. Run `supabase/verify_security_summary.sql` in a new query. **Expected: 14 rows, every `result` says PASS.**
 3. Run `npm run verify:rls` locally. Expected: every line `[PASS]`.
+
+## Known test gap to close during rehearsal (owner: Tests and demo)
+
+Most private tables and the `student-work` bucket were empty when isolation was verified, so cross-user reads of
+real records and real files are untested. After the first full run-through (both students have answers,
+diagnoses, support cycles, homework and uploads), re-run `npm run verify:rls` and manually confirm Student A
+cannot open Student B's uploaded image and the teacher can.
 
 ## Shared-rule reminders
 

@@ -31,5 +31,5 @@ export async function checkGeneratedKeys(teacher: Session, students: Session[]) 
     const bad = await notRefused(s.sb, [TABLE], ALL_OPS);
     check(`${s.label}: cannot write ${TABLE}`, bad.length === 0, bad.join(", "));
   }
-  notes.push(`${TABLE}: the table is empty, so "students see no rows" shows access works, not row filtering; its policy text is checked by supabase/verify_security_summary.sql (not yet run).`);
+  notes.push(`${TABLE}: the table is empty, so "students see no rows" shows access works, not row filtering; its policy text is checked by supabase/verify_security_summary.sql (row 14).`);
 }
