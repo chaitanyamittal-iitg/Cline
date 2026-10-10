@@ -84,3 +84,25 @@ These results were **reported by the user** after running the steps below. Cline
 - The detailed rules in `Cline_AI_Builder_Hackathon_PS.pdf` (only partly readable).
 - The in-browser sign-in flow was reported working by the user for Student A (reaches `/student`, bounced from `/teacher`) and the teacher (reaches the teacher page). Student B's browser login, sign-out, and the "other role's area" redirect for the teacher were not reported and have not been exercised by Cline or an automated browser.
 - Commit identity was set for this repository only (user-supplied name and GitHub noreply email).
+
+## Milestone 2: contract fixes (branch `fix/learning-contracts`, 10 Oct 2026)
+
+### What Cline did
+- Prepared the Windows checkout (clean tree, `main` fast-forwarded to `858a8b7`, `feat/ai` created), then created `fix/learning-contracts` from that foundation.
+- Read `AGENTS.md`, the contracts, migrations 0001-0005, the mock AI and the existing tests before editing.
+- Contracts: `approve_next_concept`, `override_diagnosis`, `assign_support`, `clear_flag` and `note` are now a typed union with no actor field; approval returns `progress` + `nextProgress` + `alreadyApplied`.
+- Student contracts: `POST /api/answers/follow-up` resumes the same attempt; `attemptOutcome`; `confirmedText` required for handwritten uploads; upload returns a draft `reading` with status `read` / `unclear` / `not_read`. The mock AI now always returns `not_read`, so it never pretends to read an image.
+- Added pure, tested rules in `src/lib/learning/` (`rules.ts`, `teacher-rules.ts`) and `applyTeacherAction` (`teacher-actions.ts`): authorization first, then validation, then persistence, which is **not built** and returns `not_implemented`.
+- Wrote migration `0006_clarification_and_handwriting.sql` (columns on `answers` only) and `supabase/verify_0006.sql`.
+- Updated `docs/CONTRACTS.md` and `docs/TASKS.md`. No dependency was added or upgraded; `package.json` and `package-lock.json` are unchanged.
+
+### Checks (real results, 10 Oct 2026)
+- `npm run lint`: exit 0. `npm run typecheck`: exit 0.
+- `npm run test`: exit 0, **125 tests in 8 files**. The first run had one failing test, my own mistake: I expected the wrong "next concept" for a shuffled curriculum. I fixed the test, not the rule, and re-ran.
+- `npm run build`: exit 0 (routes unchanged).
+- Not run: `npm run verify:rls` (nothing about access changed; it needs the secret-free demo passwords and takes about 4 minutes).
+
+### Not verified
+- **Migration 0006 is written, not applied.** It has never run on Postgres: syntax, the NOT VALID constraint and the unique indexes are unchecked until it is applied and `supabase/verify_0006.sql` returns 7 PASS.
+- **Teacher action persistence does not exist.** Only authorization, validation and the pure rules are tested; no row is ever written by `applyTeacherAction`.
+- No route handler for any `/api/*` path exists yet; the contracts are agreed shapes only.
