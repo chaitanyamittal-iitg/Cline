@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+.pnp
+.pnp.*
+.yarn/*
+
+# next.js build output
+/.next/
+/out/
+/build
+
+# testing
+/coverage
+
+# SECRETS: never commit real keys. Only .env.example is allowed.
+.env
+.env.*
+!.env.example
+
+# local files
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# uploaded student work or exports must never be committed
+/uploads/
+/student-data/
