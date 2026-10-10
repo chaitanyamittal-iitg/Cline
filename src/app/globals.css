@@ -1,0 +1,88 @@
+/* SAFAL global styles. LEAD-OWNED. Plain CSS, mobile-first (tablets are the main classroom device). */
+:root {
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --text: #1c2430;
+  --muted: #5b6676;
+  --brand: #2457d6;
+  --brand-dark: #1a3f9e;
+  --ok: #1a7f4b;
+  --warn: #b45309;
+  --danger: #b42318;
+  --border: #dbe1ea;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.5;
+  font-size: 17px;
+}
+a { color: var(--brand); }
+
+.shell-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
+}
+.brand { font-weight: 800; font-size: 1.25rem; color: var(--brand); text-decoration: none; letter-spacing: 0.04em; }
+.shell-nav { display: flex; gap: 1rem; flex: 1; }
+.shell-user { display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.95rem; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.grid { display: grid; gap: 1rem; }
+@media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+h1 { font-size: 1.6rem; margin: 0 0 0.75rem; }
+h2 { font-size: 1.2rem; margin: 0 0 0.5rem; }
+.muted { color: var(--muted); }
+
+.btn {
+  display: inline-block;
+  min-height: 44px; /* comfortable touch target */
+  padding: 0.6rem 1.1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { background: var(--brand-dark); }
+.btn-secondary { background: #e8edf6; color: var(--text); }
+.btn-secondary:hover { background: #d9e1f0; }
+
+label { display: block; font-weight: 600; margin: 0.75rem 0 0.25rem; }
+input, textarea, select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  background: #fff;
+}
+
+.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+.badge-mock { background: #fff4d6; color: #7a4b00; border: 1px solid #f1cf7a; }
+.badge-live { background: #dcf5e7; color: var(--ok); border: 1px solid #9fdcbb; }
+
+.notice { border-left: 4px solid var(--warn); background: #fff8eb; padding: 0.75rem 1rem; border-radius: 8px; }
+.error { border-left: 4px solid var(--danger); background: #fdeceb; padding: 0.75rem 1rem; border-radius: 8px; color: var(--danger); }
