@@ -58,7 +58,8 @@ async function main() {
   }
   const start = await stateOf(b, bId);
   if (start !== "lesson" && start !== "doubts") {
-    console.log(`[STOP] Student B is at '${start ?? "no row"}', not 'lesson'. This check will not reset it. Run npm run seed:users first to repeat the journey.`);
+    console.log(`[SKIP] journey checks (advance, start, answers, retry, follow-up, ownership on an attempt): Student B is at '${start ?? "no row"}', not 'lesson', and this script never resets data. Run npm run seed:users yourself to repeat the journey. The teacher checks still run below.`);
+    await teacherChecks(t, a, b);
     return;
   }
 
