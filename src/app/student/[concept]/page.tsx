@@ -7,12 +7,14 @@ import { notFound } from "next/navigation";
 import { requireStudent } from "@/lib/auth";
 import { ConceptIdSchema } from "@/lib/contracts";
 import { getJourneyData } from "@/lib/student/journey-queries";
+import { shouldShowLocalDemo } from "@/lib/student/local-demo-c3";
 import { getLessonView } from "@/lib/student/queries";
 import { describeState } from "@/lib/student/progress";
 import { DoubtStep } from "@/components/student/DoubtStep";
 import { LessonAction } from "@/components/student/LessonAction";
 import { LessonReading } from "@/components/student/LessonReading";
 import { LessonVideo } from "@/components/student/LessonVideo";
+import { LocalDemoMaterials } from "@/components/student/LocalDemoMaterials";
 import { LoadError } from "@/components/student/LoadError";
 import { SittingStep } from "@/components/student/SittingStep";
 import { StateNotice, StatePill } from "@/components/student/StateNotice";
@@ -59,6 +61,8 @@ export default async function ConceptPage({ params }: { params: Promise<{ concep
           <p className="notice">No lesson material has been approved for this concept yet. Please ask your teacher.</p>
         </section>
       )}
+      {/* Temporary: after the access check above, so only for a concept this student already has. */}
+      {shouldShowLocalDemo(conceptId, videos) && <LocalDemoMaterials />}
     </>
   );
 
@@ -91,7 +95,13 @@ export default async function ConceptPage({ params }: { params: Promise<{ concep
 
       {journey && state === "doubts" && (
         <>
-          <DoubtStep key={`doubts-${journey.messages.length}`} conceptId={conceptId} initialMessages={journey.messages} visuals={journey.visuals} />
+          <DoubtStep
+            key={`doubts-${journey.messages.length}`}
+            conceptId={conceptId}
+            conceptTitle={concept.title}
+            initialMessages={journey.messages}
+            visuals={journey.visuals}
+          />
           <details className={styles.lessonAgain}>
             <summary>Read the lesson again</summary>
             {lessonMaterial}

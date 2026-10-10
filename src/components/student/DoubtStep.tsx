@@ -13,6 +13,7 @@ import {
   type StartMicrotestRequest,
 } from "@/lib/contracts";
 import { postJson } from "@/lib/student/api-client";
+import { doubtPrompt, SKIP_DOUBTS_LABEL } from "@/lib/student/doubt-text";
 import type { TutorMessageView, VisualResourceView } from "@/lib/student/journey-types";
 import { ApprovedVisual } from "./ApprovedVisual";
 import { SourceBadge } from "./SourceBadge";
@@ -23,10 +24,12 @@ const MAX_MESSAGE = 2000;
 
 export function DoubtStep({
   conceptId,
+  conceptTitle,
   initialMessages,
   visuals,
 }: {
   conceptId: ConceptId;
+  conceptTitle: string;
   initialMessages: TutorMessageView[];
   visuals: VisualResourceView[];
 }) {
@@ -79,8 +82,8 @@ export function DoubtStep({
     <>
       <section className="card" aria-labelledby="doubts-heading">
         <p className={styles.step}>Step 2</p>
-        <h2 id="doubts-heading">Any doubts?</h2>
-        <p className="muted">Ask about anything in the lesson that you are not sure of. You can ask as many questions as you like.</p>
+        <h2 id="doubts-heading">{doubtPrompt(conceptTitle)}</h2>
+        <p className="muted">You can ask as many questions as you like.</p>
 
         {messages.length > 0 && (
           <ol className={styles.chat} aria-live="polite" aria-label="Your questions and the tutor's replies">
@@ -127,10 +130,10 @@ export function DoubtStep({
       <section className="card" aria-labelledby="start-heading">
         <p className={styles.step}>Next step</p>
         <h2 id="start-heading">No more doubts?</h2>
-        <p className="muted">When you are ready, start your short written test. You can skip the doubts and go straight to it.</p>
+        <p className="muted">When you are ready, start your short written micro-test. You can skip the doubts and go straight to it.</p>
         <div className={styles.actions}>
           <button type="button" className={`btn ${styles.primary}`} onClick={startTest} disabled={busy}>
-            {starting.pending ? "Opening your test\u2026" : startError ? "Try again" : "I have no more doubts, start the test"}
+            {starting.pending ? "Opening your micro-test\u2026" : startError ? "Try again" : SKIP_DOUBTS_LABEL}
           </button>
         </div>
         <div aria-live="polite">
