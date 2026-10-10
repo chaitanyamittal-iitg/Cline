@@ -27,6 +27,11 @@ npm run dev
 Teammates get the URL and publishable key. Only the lead holds the secret key and demo passwords until
 the backend owner needs them (they get their own `.env.local`; never commit it, never put it in chat).
 
+**Access model for now:** Macs use **session-scoped Supabase access only** (URL + publishable key, signed in as a demo
+user, RLS applies). **Privileged integration runs on the Windows machine** (lead + AI/backend), the only one with
+`SUPABASE_SECRET_KEY`. On a Mac, routes that write learning state fail with "SUPABASE_SECRET_KEY is not set"; that is
+expected. Build against the contracts, then integrate on Windows.
+
 ## Who owns what (no file has two owners)
 
 | Role | Branch | Owns exactly these paths |
@@ -66,11 +71,26 @@ owned by AI and backend. Everyone else calls it (through the API routes) and nev
 | 2 | `POST /api/tutor` | `AskTutorRequest` to `AskTutorResponse` (approved resources only; saves both messages) | Student flow | AI and backend |
 | 3 | `POST /api/attempts/start` | `StartMicrotestRequest` to `StartMicrotestResponse` (to `microtest`; prompts only, no keys; idempotent) | Student flow | AI and backend |
 | 4 | `POST /api/upload` | multipart (`UploadFields` + `file`, JPEG/PNG/WebP, max 5 MB) to `UploadResponse` | Student flow, Homework | AI and backend |
-| 5 | `POST /api/answers` | `SubmitAnswersRequest` to `SubmitAnswersResponse` (right/wrong, diagnoses, new progress, optional follow-up) | Student flow | AI and backend |
+| 4b | (same upload) | Returns a **draft** `reading` (`read` / `unclear` / `not_read`). Student confirms or corrects it; mock is always `not_read` | Student flow | AI and backend |
+| 5 | `POST /api/answers` | `SubmitAnswersRequest` to `SubmitAnswersResponse` (right/wrong or `null` while a clarification is open, diagnoses, new progress, `followUps`, `attemptOutcome`). Handwriting needs the student's `confirmedText` | Student flow | AI and backend |
+| 5b | `POST /api/answers/follow-up` | `FollowUpRequest` to `FollowUpResponse` (same shape as route 5). Resumes the SAME attempt; never uses a support cycle | Student flow | AI and backend |
 | 6 | `POST /api/support` | `StartSupportRequest` to `StartSupportResponse` (support + fresh reassessment; refuses a 3rd cycle) | Student flow | AI and backend |
 | 7 | `POST /api/homework/generate` | none to `GenerateHomeworkResponse` | Homework UI | Homework |
 | 8 | `POST /api/homework/submit` | `SubmitHomeworkRequest` to `ApiResult<{ submitted: true }>` | Homework UI | Homework |
-| 9 | `POST /api/teacher/action` | `TeacherActionRequest` to `TeacherActionResponse` | Teacher dashboard | Teacher (route), AI and backend (`lib/learning/teacher-actions.ts`) |
+| 9 | `POST /api/teacher/action` | `TeacherActionRequest` (union on `action`, no teacher id) to `TeacherActionResponse` `{ progress, nextProgress, alreadyApplied }`; errors carry a `code`. Full rules in `docs/CONTRACTS.md` | Teacher dashboard | Teacher (route calls `requireTeacher()` then `applyTeacherAction`), AI and backend (`lib/learning/teacher-actions.ts`) |
+
+**Route 9 status: contract and authorization are done; saving is NOT built.** `applyTeacherAction` currently returns
+`{ ok: false, code: "not_implemented" }` (HTTP 501) for any valid request. The Teacher worker builds the screens and
+the route against the contract and shows "saving is not ready yet" for 501. The AI and backend owner follows the
+"Persistence checklist" in `docs/CONTRACTS.md` and then flips `TEACHER_ACTIONS_PERSISTENCE_READY`.
+
+**Seeded files under `src/lib/learning/**`** (written by the lead in `fix/learning-contracts`; the AI and backend owner
+owns them from the merge and extends them, but must not weaken the rules without asking the lead):
+`rules.ts` (outcome of one sitting, state changes, two-cycle cap), `teacher-rules.ts` (approval, override and
+clear-flag rules), `teacher-actions.ts` (authorization, validation, `not_implemented` persistence) and their tests.
+
+**Who may change what in this milestone:** Lead (this role) owns `supabase/**`, `src/lib/contracts/**`, `src/lib/ai/types.ts`,
+`providers/mock.ts`, `package.json` and `package-lock.json`. No dependency was added or upgraded.
 
 Rules that apply to every route: validate the body with its Zod schema; return `{ ok: false, error }` with a
 plain-English message (never a stack trace or key); call `requireStudent()` or `requireTeacher()` first; use
@@ -139,6 +159,14 @@ and 41 of 41 on `npm run verify:rls`. Teammates share this one project, so they 
 1. Supabase dashboard, **SQL Editor**, new query, paste the whole file, **Run**. It should say success.
 2. Run `supabase/verify_security_summary.sql` in a new query. **Expected: 14 rows, every `result` says PASS.**
 3. Run `npm run verify:rls` locally. Expected: every line `[PASS]`.
+
+## Migration 0006 (written in `fix/learning-contracts`; NOT applied yet)
+
+`supabase/migrations/0006_clarification_and_handwriting.sql` adds columns to `answers` only (clarification link, student-confirmed
+handwriting text, reading status, two unique indexes). It creates no table, grant or policy. Apply it **once**, after
+this branch is merged, in Supabase SQL Editor. Do not re-run 0001-0005. Then run `supabase/verify_0006.sql`
+(expected: 7 rows, all PASS) and `supabase/verify_security_summary.sql` (expected: still 14 PASS). Until it is applied, no
+code may write the new columns; nothing in this milestone does.
 
 ## Known test gap to close during rehearsal (owner: Tests and demo)
 

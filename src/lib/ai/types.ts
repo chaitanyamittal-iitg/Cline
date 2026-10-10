@@ -5,6 +5,7 @@ import type {
   ConceptId,
   Diagnosis,
   GeneratedQuestion,
+  HandwritingReading,
   HomeworkItem,
   Reassessment,
   SupportPlan,
@@ -38,8 +39,11 @@ export interface InterpretHandwritingInput {
   questionPrompt: string;
 }
 export interface InterpretHandwritingOutput {
-  interpretedText: string;
-  source: AiSource;
+  /**
+   * A DRAFT for the student to confirm or correct. A provider that did not actually look at the image
+   * (the mock, or a live call that failed) MUST return status "not_read" with draftText null. Never invent text.
+   */
+  reading: HandwritingReading;
 }
 
 export interface DiagnoseInput {
@@ -48,8 +52,10 @@ export interface DiagnoseInput {
   questionPrompt: string;
   expectedIdea: string;
   knownMisconceptions: string[];
-  /** Typed text, or the AI's reading of the handwritten image. */
+  /** Typed text, or the text the STUDENT confirmed or corrected for a handwritten image. Never a raw AI reading. */
   studentAnswer: string;
+  /** The student's reply to an earlier follow-up question for this same question, if one was asked. */
+  clarification?: string;
   /** Earlier diagnosis evidence, so one slip is not treated as the whole picture. */
   earlierEvidence: string[];
   approvedResources: ApprovedResource[];
