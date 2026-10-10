@@ -36,6 +36,15 @@ describe("database migrations", () => {
     expect(tables).toContain("generated_question_keys");
   });
 
+  it("migration 0006 only alters answers: no new table and no new grant to any API role", () => {
+    const text = readFileSync(path.join(dir, "0006_clarification_and_handwriting.sql"), "utf8").replace(/--.*$/gm, "");
+    expect(text).not.toMatch(/create\s+table/i);
+    expect(text).not.toMatch(/\bgrant\b/i);
+    expect(text).not.toMatch(/\bdrop\b/i);
+    expect(text).not.toMatch(/(?:update|delete\s+from|truncate)\s+public\./i);
+    expect(text.match(/alter table public\.(\w+)/gi)?.every((s) => /public\.answers$/i.test(s))).toBe(true);
+  });
+
   it("keeps generated answer keys teacher-only, like question_keys", () => {
     expect(sql).toMatch(/create policy "generated_question_keys: teacher only"[\s\S]*?is_teacher\(\)/i);
     expect(sql).not.toMatch(/grant[^;]*insert[^;]*generated_question_keys[^;]*to[^;]*authenticated/i);

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { getAiProvider } from "./index";
-import { DiagnosisSchema, ReassessmentSchema, SupportPlanSchema, AnswerInputSchema } from "@/lib/contracts";
+import {
+  AnswerInputSchema,
+  DiagnosisSchema,
+  HandwritingReadingSchema,
+  ReassessmentSchema,
+  SupportPlanSchema,
+} from "@/lib/contracts";
 import { LiveAiNotConfiguredError } from "./providers/live";
 
 const baseInput = {
@@ -37,6 +43,15 @@ describe("mock AI provider", () => {
     expect(d.reasoningSound).toBe(false);
   });
 
+  it("never pretends to read a handwritten image", async () => {
+    const out = await ai.interpretHandwriting({
+      imageBytes: new Uint8Array([1, 2, 3]),
+      mimeType: "image/png",
+      questionPrompt: "Will the bulb light?",
+    });
+    expect(HandwritingReadingSchema.parse(out.reading)).toEqual({ status: "not_read", draftText: null, source: "mock" });
+  });
+
   it("returns valid support and reassessment shapes", async () => {
     const d = await ai.diagnose({ ...baseInput, studentAnswer: "Yes it lights" });
     const support = await ai.createSupport({ conceptId: "C3", cycleNumber: 1, diagnoses: [d], approvedResources: [] });
@@ -58,6 +73,6 @@ describe("answer contract", () => {
   it("requires typed text or an upload", () => {
     expect(AnswerInputSchema.safeParse({ questionId: "C3-Q1" }).success).toBe(false);
     expect(AnswerInputSchema.safeParse({ questionId: "C3-Q1", typedText: "No" }).success).toBe(true);
-    expect(AnswerInputSchema.safeParse({ questionId: "C3-Q1", uploadPath: "abc/x.jpg" }).success).toBe(true);
+    expect(AnswerInputSchema.safeParse({ questionId: "C3-Q1", uploadPath: "abc/x.jpg", confirmedText: "No" }).success).toBe(true);
   });
 });
