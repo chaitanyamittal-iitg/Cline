@@ -5,14 +5,28 @@ vi.mock("server-only", () => ({}));
 const getCurrentUser = vi.fn();
 vi.mock("@/lib/auth", () => ({ getCurrentUser: () => getCurrentUser() }));
 
-import { TEACHER_ACTIONS_PERSISTENCE_READY, applyTeacherAction } from "./teacher-actions";
+// Persistence is replaced here so these tests stay about WHO may act and WHAT is accepted. The real writes are
+// exercised against the live database by scripts/integration/stage1-http.ts.
+const persistApproval = vi.fn();
+const persistNote = vi.fn();
+vi.mock("./teacher-persist", () => ({
+  persistApproval: (...a: unknown[]) => persistApproval(...a),
+  persistNote: (...a: unknown[]) => persistNote(...a),
+}));
+
+import { PERSISTED_TEACHER_ACTIONS, TEACHER_ACTIONS_PERSISTENCE_READY, applyTeacherAction } from "./teacher-actions";
 
 const teacherId = "223e4567-e89b-42d3-a456-426614174001";
 const studentId = "123e4567-e89b-42d3-a456-426614174000";
 const teacher = { id: teacherId, role: "teacher" as const, displayName: "Ms. Rao" };
 const note = { studentId, conceptId: "C3", action: "note", note: "Spoke to the student." };
+const clearFlag = { studentId, conceptId: "C3", action: "clear_flag" };
 
-beforeEach(() => getCurrentUser.mockReset());
+beforeEach(() => {
+  getCurrentUser.mockReset();
+  persistApproval.mockReset();
+  persistNote.mockReset();
+});
 
 describe("applyTeacherAction", () => {
   it("does not claim persistence is ready", () => {
@@ -48,17 +62,47 @@ describe("applyTeacherAction", () => {
     expect(await applyTeacherAction(teacher, { ...note, note: "" })).toMatchObject({ code: "invalid_input" });
   });
 
-  it("never fakes success: a valid action returns not_implemented", async () => {
+  it("never fakes success: an action that is not built yet returns not_implemented and writes nothing", async () => {
     getCurrentUser.mockResolvedValue(teacher);
-    const r = await applyTeacherAction(teacher, note);
-    expect(r.ok).toBe(false);
-    expect(r).toMatchObject({ ok: false, code: "not_implemented" });
-    expect(r.ok === false && r.error).toMatch(/not built yet/i);
+    for (const body of [clearFlag]) {
+      const r = await applyTeacherAction(teacher, body);
+      expect(r).toMatchObject({ ok: false, code: "not_implemented" });
+      expect(r.ok === false && r.error).toMatch(/not built yet/i);
+    }
+    expect(persistApproval).not.toHaveBeenCalled();
+    expect(persistNote).not.toHaveBeenCalled();
   });
 
-  it("ignores any actor identity smuggled into the body", async () => {
+  it("lists exactly the two actions that persist in Stage 1", () => {
+    expect([...PERSISTED_TEACHER_ACTIONS].sort()).toEqual(["approve_next_concept", "note"]);
+  });
+
+  it("saves a note as the SESSION teacher", async () => {
     getCurrentUser.mockResolvedValue(teacher);
-    const r = await applyTeacherAction(teacher, { ...note, teacherId: studentId, teacher_id: studentId });
-    expect(r).toMatchObject({ code: "not_implemented" });
+    persistNote.mockResolvedValue({ ok: true, data: { alreadyApplied: false } });
+    const r = await applyTeacherAction(teacher, note);
+    expect(r.ok).toBe(true);
+    expect(persistNote).toHaveBeenCalledTimes(1);
+    expect(persistNote.mock.calls[0][0]).toBe(teacherId);
+  });
+
+  it("saves an approval as the SESSION teacher, whatever identity the body claims", async () => {
+    getCurrentUser.mockResolvedValue(teacher);
+    persistApproval.mockResolvedValue({ ok: true, data: { alreadyApplied: false } });
+    const body = { studentId, conceptId: "C3", action: "approve_next_concept", teacherId: studentId, teacher_id: studentId };
+    await applyTeacherAction(teacher, body);
+    expect(persistApproval).toHaveBeenCalledTimes(1);
+    expect(persistApproval.mock.calls[0][0]).toBe(teacherId);
+    expect(JSON.stringify(persistApproval.mock.calls[0][1])).not.toContain("teacher_id");
+  });
+
+  it("does not call persistence for a student, an unsigned caller or an invalid body", async () => {
+    await applyTeacherAction({ id: studentId, role: "student" }, note);
+    getCurrentUser.mockResolvedValue(null);
+    await applyTeacherAction(teacher, note);
+    getCurrentUser.mockResolvedValue(teacher);
+    await applyTeacherAction(teacher, { studentId, conceptId: "C3", action: "approve_next_concept", overrideUnderstanding: true });
+    expect(persistApproval).not.toHaveBeenCalled();
+    expect(persistNote).not.toHaveBeenCalled();
   });
 });

@@ -38,7 +38,8 @@ export class MockAiProvider implements AiProvider {
   }
 
   async diagnose(input: DiagnoseInput): Promise<Diagnosis> {
-    const a = input.studentAnswer;
+    // A clarification is read together with the first answer (contract: DiagnoseInput.clarification).
+    const a = input.clarification ? `${input.studentAnswer} ${input.clarification}` : input.studentAnswer;
     const base = { conceptId: input.conceptId, questionId: input.questionId, source: "mock" as const };
 
     if (input.conceptId === "C3") {

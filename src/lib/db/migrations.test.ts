@@ -45,6 +45,30 @@ describe("database migrations", () => {
     expect(text.match(/alter table public\.(\w+)/gi)?.every((s) => /public\.answers$/i.test(s))).toBe(true);
   });
 
+  it("migration 0007 adds only functions: no table, no table grant, no policy, nothing dropped", () => {
+    const text = readFileSync(path.join(dir, "0007_learning_loop_functions.sql"), "utf8").replace(/--.*$/gm, "");
+    expect(text).not.toMatch(/create\s+table|create\s+policy|drop\s|alter\s+table|truncate/i);
+    const grantsOnTables = [...text.matchAll(/\bgrant\b[^;]*\bon\b\s+(?!function)/gi)];
+    expect(grantsOnTables).toEqual([]);
+  });
+
+  it("migration 0007: every function is server-only (revoked from browser roles, granted to service_role only)", () => {
+    const text = readFileSync(path.join(dir, "0007_learning_loop_functions.sql"), "utf8").replace(/--.*$/gm, "");
+    const names = [...text.matchAll(/create or replace function public\.(\w+)\(/gi)].map((m) => m[1]);
+    expect(names.length).toBe(6);
+    for (const n of names) {
+      expect(text, `${n} must be revoked from public, anon and authenticated`).toMatch(
+        new RegExp(`revoke all on function public\\.${n}\\([^)]*\\) from public, anon, authenticated;`, "i"),
+      );
+      expect(text, `${n} must be granted to service_role`).toMatch(
+        new RegExp(`grant execute on function public\\.${n}\\([^)]*\\) to service_role;`, "i"),
+      );
+    }
+    expect(text).not.toMatch(/grant execute[^;]*\bto\b[^;]*\b(anon|authenticated|public)\b/i);
+    expect(text).not.toMatch(/security definer/i); // they run as the caller, so no hidden privilege escalation
+    expect(text.match(/for update;/gi)?.length).toBeGreaterThanOrEqual(5); // each locks the progress row
+  });
+
   it("keeps generated answer keys teacher-only, like question_keys", () => {
     expect(sql).toMatch(/create policy "generated_question_keys: teacher only"[\s\S]*?is_teacher\(\)/i);
     expect(sql).not.toMatch(/grant[^;]*insert[^;]*generated_question_keys[^;]*to[^;]*authenticated/i);
