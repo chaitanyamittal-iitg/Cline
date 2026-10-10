@@ -26,7 +26,14 @@ export async function signIn(who: string, email: string, passwordEnv: string): P
       setAll: (all) => all.forEach(({ name, value }) => (value ? jar.set(name, value) : jar.delete(name))),
     },
   });
-  const { error } = await db.auth.signInWithPassword({ email, password });
+  // The Supabase host from this machine sometimes times out on a fresh connection ("fetch failed"). Retry ONLY that
+  // network error: a wrong password or any real auth answer fails immediately and is never retried.
+  let error: { message: string } | null = null;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+    if (!error || !/fetch failed|timeout|network/i.test(error.message)) break;
+    await new Promise((r) => setTimeout(r, 3000));
+  }
   if (error) throw new Error(`${who}: sign-in failed (${error.message}).`);
   const cookie = [...jar].map(([name, value]) => `${name}=${value}`).join("; ");
   return { who, cookie, db };
