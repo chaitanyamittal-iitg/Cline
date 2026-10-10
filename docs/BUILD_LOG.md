@@ -4,6 +4,21 @@ Only things that actually happened are recorded here. Update the "Checks" lines 
 
 REMINDER: record a short **screen recording** of Cline editing code and running checks for the mandatory demo video.
 
+## Final integration check (branch `feat/ai`, merged with origin/main at the student PR #5)
+
+- Student PR #5 is merged; **teacher PR is not merged**, so `/api/teacher/action` does not exist on `origin/main` (it exists on
+  `origin/feat/teacher` at `c42df29`). Teacher approval through that route is therefore **unverified over HTTP**.
+- On the merged tree: lint, typecheck, test (263 in 22 files) and build all exit 0.
+- `npm run verify:stage1` against the production build on `http://localhost:3100`, run twice **without any warm-up request**:
+  19 passed, 0 failed, 3 skipped each time. All 8 route-authentication checks passed both times; the earlier 401-instead-of-403
+  did **not** recur. Its cause is still unproven (suspected cold start or a slow first connection to Supabase).
+- Skipped (printed as `[SKIP]`, never as passes): the journey checks and the first-approval checks (Student B already at `passed`
+  and approved; nothing is reset), and the teacher HTTP route checks (route absent).
+- Sign-in to Supabase from this Windows machine sometimes times out ("fetch failed"). `scripts/integration/net-probe.ts` showed two
+  10-second timeouts then normal 401 health answers. The sign-in helper now retries only network errors.
+- Read-only state inspection (`scripts/integration/inspect-state.ts`): Student A is at C3 `lesson` with no attempts or answers;
+  Student B is at C3 `passed`, approved, with C4 created in `lesson`, 1 attempt, 4 answers, 3 teacher actions.
+
 ## Backend Stage 1 (branch `feat/ai`): typed-answer journey and teacher approval
 
 - Cline wrote migration `0007_learning_loop_functions.sql` (six atomic functions), `verify_0007.sql`, the API-safe auth helper,
