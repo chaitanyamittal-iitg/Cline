@@ -6,7 +6,7 @@ import type { z } from "zod";
 
 export type ActionOutcome =
   | { kind: "saved"; data: z.infer<typeof TeacherActionResponseSchema> }
-  /** The login redirect (or any non-JSON answer) means the teacher session could not be verified. */
+  /** HTTP 401 (nobody signed in), or a redirect / non-JSON answer: the teacher session could not be verified. */
   | { kind: "session"; message: string }
   /** HTTP 501 / code not_implemented. Nothing was saved. */
   | { kind: "not_ready"; message: string }
@@ -29,6 +29,25 @@ const CODES: readonly TeacherActionErrorCode[] = [
   "not_implemented",
   "internal",
 ];
+
+/**
+ * The API-safe helpers (src/lib/learning/api-auth.ts) answer { ok: false, error } WITHOUT a code and use the HTTP status:
+ * 400 invalid input, 403 not a teacher, 404 not found, 409 rule violation, 501 not implemented, 500/503 server problem.
+ * (401 is handled separately: it means the session could not be verified.) A code in the body, if present, is honoured.
+ */
+function codeFromStatus(status: number): TeacherActionErrorCode | null {
+  switch (status) {
+    case 400: return "invalid_input";
+    case 403: return "forbidden";
+    case 404: return "not_found";
+    case 409: return "rule_violation";
+    case 501: return "not_implemented";
+    case 500:
+    case 502:
+    case 503: return "internal";
+    default: return null;
+  }
+}
 
 /** The slice of a fetch Response this needs. Keeping it small makes it testable without a network. */
 export interface ResponseLike {
@@ -65,7 +84,9 @@ export async function classifyResponse(response: ResponseLike): Promise<ActionOu
   if (!isRecord(body) || typeof body.ok !== "boolean") return { kind: "unexpected", message: UNEXPECTED_MESSAGE };
 
   if (body.ok === false) {
-    const code = CODES.find((c) => c === body.code);
+    // 401 from authenticateApi("teacher"): nobody is signed in. Never success; the form offers a sign-in link.
+    if (response.status === 401) return { kind: "session", message: SESSION_MESSAGE };
+    const code = CODES.find((c) => c === body.code) ?? codeFromStatus(response.status);
     const message = typeof body.error === "string" && body.error.trim() !== "" ? body.error : UNEXPECTED_MESSAGE;
     // 501 and not_implemented are never success, whatever else the body says.
     if (response.status === 501 || code === "not_implemented") return { kind: "not_ready", message: NOT_READY_MESSAGE };

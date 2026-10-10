@@ -1,11 +1,11 @@
 // Student detail. Owned by the Teacher dashboard (branch feat/teacher).
 // Reads with the teacher's own session (RLS applies). The action forms below call POST /api/teacher/action; this page
-// itself writes nothing. Saving is read from the backend flag on the server and passed down as a plain boolean.
+// itself writes nothing. Which actions can save is read from the backend on the server and passed down as plain data.
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireTeacher } from "@/lib/auth";
 import { loadStudentDetail } from "@/lib/teacher/detail";
-import { teacherActionSavingReady } from "@/lib/teacher/readiness";
+import { teacherActionAvailability } from "@/lib/teacher/readiness";
 import { AttemptCard } from "@/components/teacher/AttemptCard";
 import { ClarificationReply } from "@/components/teacher/ClarificationReply";
 import { ConceptActions } from "@/components/teacher/ConceptActions";
@@ -41,7 +41,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const { student, progress, conceptTitles, work, unlinkedDiagnoses, support, images, diagnosisOptions, resourceOptions } =
     result.detail;
   const titleOf = (conceptId: string) => conceptTitles[conceptId] ?? conceptId;
-  const savingReady = teacherActionSavingReady();
+  const availability = teacherActionAvailability();
 
   return (
     <div className={styles.stack}>
@@ -74,7 +74,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               concept={concept}
               diagnosisOptions={diagnosisOptions}
               resourceOptions={resourceOptions}
-              savingReady={savingReady}
+              availability={availability}
             />
           ))
         )}

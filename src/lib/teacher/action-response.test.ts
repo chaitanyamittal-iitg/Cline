@@ -80,9 +80,43 @@ describe("classifyResponse: 501 and backend refusals", () => {
     expect(out).toEqual({ kind: "rejected", code: "rule_violation", message: "Approving needs an override and a note." });
   });
 
-  it("reports an unknown code as unexpected, and an empty message with a known code as rejected", async () => {
-    expect((await classifyResponse(res({ status: 400, body: { ok: false, code: "weird", error: "x" } }))).kind).toBe("unexpected");
-    expect((await classifyResponse(res({ status: 500, body: { ok: false, code: "internal", error: "" } }))).kind).toBe("rejected");
+  it("reports an unknown code on an unrecognised status as unexpected, never as saved", async () => {
+    expect((await classifyResponse(res({ status: 418, body: { ok: false, code: "weird", error: "x" } }))).kind).toBe("unexpected");
+  });
+
+  it("falls back to the HTTP status when the body has an unknown code", async () => {
+    const out = await classifyResponse(res({ status: 400, body: { ok: false, code: "weird", error: "x" } }));
+    expect(out).toEqual({ kind: "rejected", code: "invalid_input", message: "x" });
+  });
+});
+
+describe("classifyResponse: the real route's envelope has no code, only the HTTP status", () => {
+  const failure = (status: number, error: string) => res({ status, body: { ok: false, error } });
+
+  it("treats 401 as an unverified session with a sign-in link, never as a rejection or success", async () => {
+    expect(await classifyResponse(failure(401, "Please sign in first."))).toEqual({ kind: "session", message: SESSION_MESSAGE });
+  });
+
+  it.each([
+    [400, "invalid_input"],
+    [403, "forbidden"],
+    [404, "not_found"],
+    [409, "rule_violation"],
+    [500, "internal"],
+    [503, "internal"],
+  ] as const)("maps HTTP %i to %s and keeps the plain-English message", async (status, code) => {
+    expect(await classifyResponse(failure(status, "Plain message."))).toEqual({ kind: "rejected", code, message: "Plain message." });
+  });
+
+  it("shows the exact not-ready message for a codeless 501", async () => {
+    expect(await classifyResponse(failure(501, "Teacher action 'clear_flag' is valid, but saving it is not built yet."))).toEqual({
+      kind: "not_ready",
+      message: "Saving is not ready yet. Your changes have not been saved.",
+    });
+  });
+
+  it("treats an unrecognised failing status without a code as unexpected", async () => {
+    expect((await classifyResponse(failure(418, "teapot"))).kind).toBe("unexpected");
   });
 });
 
