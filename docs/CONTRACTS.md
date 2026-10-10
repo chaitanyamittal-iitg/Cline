@@ -124,6 +124,9 @@ It never fakes success and never writes. `TEACHER_ACTIONS_PERSISTENCE_READY` is 
 against the contract and shows `not_implemented` as "saving is not ready yet". Pure rules already exist and are tested:
 `planApproval`, `changedDiagnosisFields`, `clearFlag` in `src/lib/learning/teacher-rules.ts`.
 
+> **Stage 1 update:** `approve_next_concept` and `note` now persist (see `docs/BACKEND_STAGE1.md`, including the
+> API-safe authentication pattern with JSON 401/403 for API routes). The other three actions still return `not_implemented`.
+
 ### Persistence checklist (AI and backend owner)
 
 Do all writes with `createSupabaseAdminClient()` after the authorization check, inside `src/lib/learning/**`:
