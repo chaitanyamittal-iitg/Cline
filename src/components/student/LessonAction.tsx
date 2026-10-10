@@ -95,10 +95,7 @@ export function LessonAction({ conceptId, initialState }: { conceptId: ConceptId
       <section className="card" aria-live="polite">
         <p className={styles.step}>Saved</p>
         <h2>Your lesson is complete</h2>
-        <p className="notice">
-          The doubts screen is not ready yet, so there is nothing more to do here for now. Your progress has been
-          saved and your place will be kept.
-        </p>
+        <p role="status">Opening the next step&hellip;</p>
       </section>
     );
   }

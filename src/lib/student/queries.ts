@@ -38,7 +38,7 @@ interface ProgressRow {
   teacher_cleared_to_next: boolean;
 }
 
-function toProgress(row: ProgressRow): ConceptProgress | null {
+export function toProgress(row: ProgressRow): ConceptProgress | null {
   const parsed = ConceptProgressSchema.safeParse({
     studentId: row.student_id,
     conceptId: row.concept_id,
@@ -50,7 +50,7 @@ function toProgress(row: ProgressRow): ConceptProgress | null {
   return parsed.success ? parsed.data : null;
 }
 
-function toConcept(row: { id: string; position: number; title: string; objective: string }): ConceptSummary | null {
+export function toConcept(row: { id: string; position: number; title: string; objective: string }): ConceptSummary | null {
   const id = ConceptIdSchema.safeParse(row.id);
   return id.success ? { id: id.data, position: row.position, title: row.title, objective: row.objective } : null;
 }

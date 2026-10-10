@@ -1,7 +1,7 @@
 // Plain-language wording and "current concept" selection for the student screens.
 // Pure functions over data that was read from the database; nothing here unlocks anything.
 // Only the server (via a teacher action) can move a student on, so the UI never infers that from answers.
-import type { ConceptId, ConceptProgress, LearningState } from "@/lib/contracts";
+import { MAX_SUPPORT_CYCLES, type ConceptId, type ConceptProgress, type LearningState } from "@/lib/contracts";
 
 export interface ConceptSummary {
   id: ConceptId;
@@ -24,6 +24,17 @@ export interface StateMessage {
 
 export function needsTeacher(progress: Pick<ConceptProgress, "state" | "teacherFlagged">): boolean {
   return progress.state === "teacher_flagged" || progress.teacherFlagged;
+}
+
+/**
+ * Whether the screen may OFFER the extra-help button. This only decides what to show; the server enforces the real
+ * rule (at most two automated support/reassessment cycles) and refuses a third. Mirrors canStartSupport() in
+ * src/lib/learning/rules.ts, which client code may not import.
+ */
+export function canRequestSupport(
+  progress: Pick<ConceptProgress, "state" | "teacherFlagged" | "supportCyclesUsed">,
+): boolean {
+  return progress.state === "support" && !progress.teacherFlagged && progress.supportCyclesUsed < MAX_SUPPORT_CYCLES;
 }
 
 export function describeState(progress: ConceptProgress): StateMessage {
