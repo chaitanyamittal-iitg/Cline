@@ -4,6 +4,20 @@ Only things that actually happened are recorded here. Update the "Checks" lines 
 
 REMINDER: record a short **screen recording** of Cline editing code and running checks for the mandatory demo video.
 
+## Teacher PR #6 merged: teacher HTTP verification (branch `feat/ai`)
+
+- Merged `origin/main` (`d9fed7d`, teacher PR #6) into `feat/ai` cleanly. lint, typecheck, test (361 in 34 files), build: exit 0.
+  The build lists `/api/teacher/action` and `/teacher/students/[studentId]`. App restarted from that build on `http://localhost:3100`.
+- `npm run verify:teacher-http` (new; real HTTP, real signed-in sessions, no warm-up, no direct persistence calls):
+  **19 passed, 0 failed.** Logged-out 401, student 403, unknown action 400, override without a note 400, malformed id 400,
+  unknown student 404, an unbuilt action 501; repeat approval (200, alreadyApplied, no audit row) and a note (200, state unchanged,
+  one audit row, teacher = session user) for Student B; teacher detail page 200 and free of answer keys; logged-out and student
+  are redirected; Student A's records identical before and after.
+- **Still unverified over HTTP:** a FIRST approval (Student B was already approved earlier; nothing is reset). Journey checks over
+  HTTP are skipped for the same reason, and were last run against Student B before the teacher route existed.
+- Not available yet: support/reassessment route, tutor, photo upload, `override_diagnosis` / `assign_support` / `clear_flag`
+  (501), homework, live AI.
+
 ## Final integration check (branch `feat/ai`, merged with origin/main at the student PR #5)
 
 - Student PR #5 is merged; **teacher PR is not merged**, so `/api/teacher/action` does not exist on `origin/main` (it exists on

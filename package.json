@@ -13,6 +13,7 @@
     "env:check:live": "tsx --env-file=.env.local scripts/check-env.ts --live",
     "seed:users": "tsx --env-file=.env.local scripts/seed-users.ts",
     "verify:rls": "tsx --env-file=.env.local scripts/verify-isolation.ts",
+    "verify:teacher-http": "tsx --conditions=react-server --env-file=.env.local scripts/integration/teacher-http-final.ts",
     "verify:stage1": "tsx --conditions=react-server --env-file=.env.local scripts/integration/stage1-http.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "check:full": "npm run check && npm run verify:rls"
