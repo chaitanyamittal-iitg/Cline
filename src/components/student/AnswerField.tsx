@@ -2,6 +2,7 @@
 
 // One open-ended question: the student TYPES an answer or adds a PHOTO of handwriting (see PhotoAnswer).
 import type { AnswerDraft, AnswerMode } from "@/lib/student/answer-draft";
+import { DEMO_AVAILABILITY, PHOTO_UNAVAILABLE_BUTTON, PHOTO_UNAVAILABLE_NOTICE } from "@/lib/student/demo-availability";
 import type { PromptQuestion } from "@/lib/student/journey-types";
 import { PhotoAnswer, type DraftUpdater } from "./PhotoAnswer";
 import styles from "./student.module.css";
@@ -22,6 +23,7 @@ export function AnswerField({
   disabled: boolean;
 }) {
   const inputId = `answer-${question.id}`;
+  const photoAvailable = DEMO_AVAILABILITY.photoUpload;
   const setMode = (mode: AnswerMode) => update((d) => ({ ...d, mode }));
 
   return (
@@ -40,15 +42,21 @@ export function AnswerField({
         </button>
         <button
           type="button"
-          className={`${styles.modeBtn} ${draft.mode === "photo" ? styles.modeOn : ""}`}
-          aria-pressed={draft.mode === "photo"}
+          className={`${styles.modeBtn} ${draft.mode === "photo" && photoAvailable ? styles.modeOn : ""}`}
+          aria-pressed={draft.mode === "photo" && photoAvailable}
+          disabled={!photoAvailable}
           onClick={() => setMode("photo")}
         >
-          Add a photo
+          {photoAvailable ? "Add a photo" : PHOTO_UNAVAILABLE_BUTTON}
         </button>
       </div>
+      {!photoAvailable && (
+        <p className={styles.hint} role="note">
+          {PHOTO_UNAVAILABLE_NOTICE}
+        </p>
+      )}
 
-      {draft.mode === "type" ? (
+      {draft.mode === "type" || !photoAvailable ? (
         <>
           <label htmlFor={inputId}>Your answer</label>
           <textarea

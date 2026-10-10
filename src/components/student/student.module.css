@@ -140,3 +140,17 @@ a.journeyItem:hover { background: #f1f5ff; }
   .primary { width: 100%; }
 }
 
+
+/* ---- Temporary local demo materials (C3) ---- */
+.demoSection { border: 2px dashed #f1cf7a; background: #fffdf6; }
+.demoTag { display: inline-block; margin: 0 0 0.5rem; padding: 0.15rem 0.7rem; border-radius: 999px; background: #fff4d6; color: #7a4b00; border: 1px solid #f1cf7a; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.demoSub { margin: 1.25rem 0 0.25rem; font-size: 1.1rem; }
+.demoVideos { list-style: none; margin: 0.75rem 0; padding: 0; display: grid; gap: 1rem; }
+.demoVideo { padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.demoVideoTitle { margin: 0 0 0.35rem; font-weight: 700; }
+.demoMeta { margin: 0 0 0.5rem; color: var(--muted); font-size: 0.95rem; }
+.demoReadingTitle { margin: 0 0 0.25rem; font-size: 1.3rem; }
+.demoReadingHeading { margin: 1.25rem 0 0.4rem; font-size: 1.1rem; color: var(--brand-dark); }
+.demoList { margin: 0.25rem 0 1rem; padding-left: 1.25rem; font-size: 1.1rem; line-height: 1.7; }
+.demoList li { margin-bottom: 0.4rem; }
+
